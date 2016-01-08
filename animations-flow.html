@@ -188,11 +188,11 @@ h1 sub
 {
   position: absolute;
   top: 100%;
-  -webkit-animation: scroll 150s linear 4s infinite;
-  -moz-animation: scroll 150s linear 4s infinite;
-  -ms-animation: scroll 150s linear 4s infinite;
-  -o-animation: scroll 150s linear 4s infinite;
-  animation: scroll 150s linear 4s infinite;
+  -webkit-animation: scroll 100s linear 4s infinite;
+  -moz-animation: scroll 100s linear 4s infinite;
+  -ms-animation: scroll 100s linear 4s infinite;
+  -o-animation: scroll 100s linear 4s infinite;
+  animation: scroll 100s linear 4s infinite;
 }
 
 /* animation */
@@ -235,21 +235,45 @@ h1 sub
 
   <p>Gecko の内部には主に3つのアニメーションがあります。</p>
 
-  <p>CSS animations、 CSS transitions、 web animations です。
+  <p>
+   CSS animations、 CSS transitions、 web animations です。
    正確に言えば、もうひとつ SVG animation というものもありますが、ここでは取り上げません。
    なぜなら、私が理解していないからです。
    SVG animation 以外のアニメーションは細かい所は別として共通の処理で動作しています。
-   これからその処理について説明していきます。</p>
+   これからその処理について説明していきます。
+  </p>
 
   <p class="center">Refresh driver</p>
-  <p>アニメーションの処理は基本的に繰り返しの処理です。
+  <p>
+   アニメーションの処理は基本的に繰り返しの処理です。
  　style を計算して、その結果 layout の変更が必要な場合は layout の処理を行い、そして、その結果を paint します。
    この繰り返しの処理を担っているのが、nsRefreshDriver というクラスです。
    nsRefreshDriver は各ドキュメント毎に、正確には nsPresContext 毎にですが、存在しています。
    Firefox の chrome ドキュメント、タブ内の HTML ドキュメント、また、HTML ドキュメント内の iframe ドキュメントなどです。
    ただし、iframe に対応している nsRefreshDriver はその祖先の HTML ドキュメントの nsRefreshDriver と共有されています。
    この nsRefreshDriver が ディスプレイハードウェアの垂直同期に従って動作します。
-   例えば、垂直同期が60Hzの場合、1/60秒つまり、16.6ms 毎に nsRefreshDriver の Tick という関数が呼び出されます。</p>
+   ※ 2016年1月8日時点で Linux platform ではハードウェアの垂直同期ではなく、ソフトウェアでエミュレートしています。
+   例えば、垂直同期が60Hzの場合、1/60秒つまり、16.6ms 毎に nsRefreshDriver の Tick という関数が呼び出されます。
+   この Tick の中から、style/layout/paint のそれぞれ処理が呼び出されることになります。
+   ただし、paint の処理だけは、他と違い root の nsRefreshDriver のみで実行されます。
+   root の nsRefreshDriver というのは、マルチプロセス動作の場合は、chrome ドキュメントに対応した nsRefreshDriverと
+   タブ内で読み込まれている HTML ドキュメントの nsRefreshDriver になります。
+   マルチプロセス動作でない場合には、chrome ドキュメントに対応した nsRefreshDriver のみが root の nsRefreshDriver になっています。
+   つまり、マルチプロセス動作でない場合の paint 処理は、タブ内の HTML ファイルに対する paint 処理であっても、
+   chrome ドキュメントの nsRefreshDriver が駆動していることになります。
+  </p>
+
+  <p class="center">nsRefreshDriver::Tick</p>
+  <p>
+   続いて、nsRefreshDriver::Tick 内の処理を見て行きましょう。
+   nsRefreshDriver::Tick 内でのアニメーションに関する処理は以下の順序で実行されます。
+  </p>
+  <p class="center">Animation::Tick</p>
+  <p class="center">Dispatch animation events (animationend etc.)</p>
+  <p class="center">requestAnimationFrame</p>
+  <p class="center">Style</p>
+  <p class="center">Layout</p>
+  <p class="center">Paint</p>
 
 </div></div>
 
