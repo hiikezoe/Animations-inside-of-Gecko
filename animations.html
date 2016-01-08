@@ -1,0 +1,395 @@
+<!DOCTYPE HTML>
+<!-- <html lang="en-US"> -->
+<html lang="ja-JP" class="fade">
+<!--
+  ^ a class of "fade" makes slides fade smoothly into one another
+ -->
+<!-- <html lang="en-US" class="nonumbers"> -->
+<!--
+  If you want no numbers on the slides add a "nonumbers" class
+  to the HTML element.
+  Adding a class of "fade" will make slides fade into another.
+-->
+<head>
+  <meta charset="UTF-8">
+  <title>Geckoの中のアニメ インターネットを知らず</title>
+<!--
+  If you upload your slides to the web, ensure that you have
+  a good title - this shows up in search results and social
+  media links
+ -->
+  <meta name="viewport" content="width=device-width, user-scalable=yes">
+  <link rel="stylesheet" href="themes/mozilla/styles/style.css">
+  <link rel="stylesheet" href="themes/mozilla/styles/obsidian.css">
+</head>
+<body class="list">
+  <header class="caption">
+    <h1>Geckoの中のアニメ インターネットを知らず</h1>
+    <p class="footer">
+      池添 浩之,
+      <a href="http://github.com/hiikezoe">hiikezoe</a>
+    </p>
+  </header>
+  <aside class="talkdescription">
+    <p>
+       Gecko 内部のアニメーション処理を理解するために必要になる小技を紹介します。
+       Gecko Inside 史上最も簡単な内容です。※個人の感想です。
+       このスライドに書かれていることを使えば、あなたも明日から Gecko のアニメーション開発者になれます！※個人の願望です。
+       <button onclick="goFullScreen()">Go fullscreen</button>
+    </p>
+    <div><p class="abstract">
+      <strong>
+      概要: Gecko 内部のアニメーション処理は DOM、Layout、Graphics と３つの大きなコンポーネントにまたがっています。
+      </strong>
+    </p></div>
+  </aside>
+
+<!--
+    Simply copy the whole block for each slide you want.
+  Special slides get extra classes. Each slide needs an ID
+  to allow for bookmarking and target jumping.
+-->
+
+  <div id="cover" class="slide oneline"><div>
+    <section>
+      <header>
+        <div><h2><strong>Geckoの中のアニメ<br/>インターネットを知らず</strong></h2></div>
+      </header>
+      <small class="byline">
+        池添 浩之, Gecko inside #5, 2016年吉日
+      </small>
+      <div>
+      <footer class="notes">
+        Mozilla Japan の池添です。よろしくお願いします。
+        私は普段家でひとりで仕事をしているので、人前で話をするのはうまくありません。
+        そういうわけで、今日は原稿を丸読みします。
+        つぶやく際にはぜひ「#セリフ棒読み」のハッシュタグをつけてください。
+        そうすることで、『あ、アニメの話だな』と捕捉され易くなると思います。
+
+        今日はアニメの話ということで、アニメが好きな方がたくさんお集まりだと思います。
+        アニメが好きだという方は挙手をお願いします。
+
+        好きこそ物の上手なれということで、今手を挙げた皆さんには才能があります。
+        ぜひその才能を活かして明日から、間違えました、今日からアニメーションの開発に参加してください。
+        それでは早速 Gecko の中のアニメの世界へ入って行くことにします。
+      </footer>
+      </div>
+    </section>
+  </div></div>
+
+  <div id="animation-process-flow" class="slide autoplay cover w"><div>
+    <section>
+      <header>
+        <h2>Gecko内でのアニメーション処理の流れ</h2>
+      </header>
+      <video controls class="middle shadow">
+        <source src="videos/animation-flow.mp4" type="video/mp4"></source>
+        <source src="videos/animation-flow.webm" type="video/webm"></source>
+      </video>
+      <small class="credits">
+        Script by <a href="http://twitter.com/craigbuckler">@craigbuckler</a>
+        <a href="http://www.sitepoint.com/css3-starwars-scrolling-text">
+          sitepoint.com/css3-starwars-scrolling-text/
+        </a>
+      </small>
+      <footer class="notes">
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="introduction" class="slide cover h shout"><div>
+    <section>
+      <header>
+        <h2><strong>?</strong></h2>
+      </header>
+      <img src="pictures/Labyrinth.jpg"
+           class="middle"
+           alt="labyrinth">
+      <small class="credits">
+        <a href="https://commons.wikimedia.org/wiki/File:Labyrinth_28.jpg">
+          Image by Toni Pecoraro
+        </a>
+      </small>
+      <footer class="notes">
+        先の動画では Gecko 内部にはどのようなアニメーションの種類があって、
+        どのようにアニメーションが生成され、どのように処理されるかを説明しました。
+        もし、理解できなかった方がいらっしゃいましたら、それは、動体視力が足りません。
+        もっとアニメをたくさん見て動体視力・聴力を鍛えてください。
+        しかし、たとえ先の動画を理解できたとしてもそれだけでは Gecko のアニメーション機能を
+        開発していくには十分ではありません。
+        どうしてでしょうか？
+        先の動画のような処理の流れの説明は Gecko 内部のアニメーションを理解するための地図にはなります。
+        しかし残念ながら、あなたはその地図を片手に、一体自分が目の前で見ているアニメは何のアニメなのか？
+        と、途方にくれることになるかと思います。
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="animation-everywhere" class="slide cover h"><div>
+    <section>
+      <header>
+      </header>
+      <style>
+      @keyframes moving {
+        0%   { transform: translate(380px, 10px) scale(0.5); }
+        100% { transform: translate(50px, 200px) scale(0); }
+      }
+      @keyframes foxkeh-swing {
+        0%   { transform: rotate(-10deg); }
+        50%  { transform: rotate(10deg); }
+        100% { transform: rotate(-10deg); }
+      }
+      img#foxkeh {
+        animation: foxkeh-swing ease-in-out 2s infinite;
+        transform-origin: 0 -55%;
+        width: 112px;
+        height: 120px;
+      }
+      div#foxkeh-frame {
+        animation: moving 8s infinite;
+        position: absolute;
+        z-index: 999;
+      }
+      </style>
+      <div id="foxkeh-frame"><img id="foxkeh" src="pictures/foxkeh.png"></div>
+      <img src="pictures/cat-watching-tv.jpg"
+           class="middle"
+           alt="Three cats watching TV">
+
+      <small class="credits">
+        <a href="https://www.flickr.com/photos/major_clanger/3690964841">
+          Photo by Major Clanger
+        </a>
+      </small>
+      <footer class="notes">
+        みなさんアニメは大好きですよね？
+        そういうみなさんの嗜好に合わせているのか、どうなのか分かりませんが、
+        最近は色々な所でアニメを目にするようになりました。
+        パンくずリストをアニメーションさせたり、アコーディオン式のメニュー、
+        マウスを乗せると色が変わるボタンなど、もう本当に到るところアニメだらけです。
+        Firefox それ自体でも、タブのローディングアイコン、Awesome バーの下向きアイコンや進むボタンの表示等、
+        また、ダウンロード時のアイコンアニメーションなどなど、様々な所でアニメーションが利用されています。
+        そのような状況の中で、問題を調査するためのテストケースやサンプルの HTML ファイルを読み込んで、
+        デバッガで break point を設定すると目的外のアニメーションの処理で止まりまくります！
+        (基本的に 16.6ms 毎に同じ処理が呼び出されます！)
+        もちろんデバッガで break すると後の挙動が変わります！
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="document" class="slide"><div>
+    <section>
+      <header>
+        <h2>documentの特定</h2>
+      </header>
+      <pre>
+        <code class="cpp">// nsIDocument* document;</code>
+        <code class="cpp">nsAutoCString spec;</code>
+        <code class="cpp">document->GetDocumentURI()->GetSpec(spec);</code>
+        <code class="cpp">printf("document: %s\n", spec.get());</code>
+      </pre>
+      <footer class="notes">
+       Firefox の起動オプションには、-layoutdebug というオプションが付いていて、
+       これを指定することで先に説明したアニメーションがたくさんついた chrome ウインドウではなく、
+       シンプルな chrome ウインドウで作成された layout 機能のデバッグ目的に特化したブラウザが立ち上がります。
+       これを使えば、Firefox の chrome 上のアニメーションに悩まされることはなくなります。
+       ただ残念ながら、この layoutdebug はマルチプロセスに対応していません。
+       マルチプロセスでのバグを直したりする場合には、やはり Firefox を使うことになります。
+       そういうわけで、自分が見ているアニメーションが、Firefox の chrome 上にあるものなのか、
+       それとも HTML ドキュメント上にあるものなのかを区別する必要が出てきます。
+
+       nsIDocument を手に入れるには
+        1) nsPresContext から
+           Document()
+        2) nsIPresShell から
+           GetDocument()
+        3) nsRefreshDriver から
+           PresContext()->Document()
+        4) RestyleManager から
+           PresContext()->Document()
+        5) Animation から
+        　 GetRenderedDocument()
+       (注)
+       Gecko の命名規則で、getter に Get と付いている関数は nullptr を返す可能性があるという
+       ドキュメントを読んだ記憶があるんですが、この資料を作成する時に探してみたら見つかりませんでした。
+       というわけで、適宜 nullptr チェックしてから使ってください。
+       ここに挙げた関数でいうと、nsRefreshDriver の PresContext() に nullptr チェックが必要になります。
+       あとは、Animation の GetRenderedDocument() にも必要です。
+       他は必要ありません。
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="identified-by-element" class="slide"><div>
+    <section>
+      <header>
+        <h2>1. animationの特定 (DOM要素から)</h2>
+      </header>
+      <small>HTML</small>
+      <pre>
+      <code ><div id="オレオレ" style="animation: anim 2s"></div></code>
+      </pre>
+      <small>C++</small>
+      <pre>
+      <code class="cpp">// Element* element;</code>
+      <code class="cpp">nsAutoString id;</code>
+      <code class="cpp">element->GetId(id);</code>
+      <code class="cpp">printf("element: %s\n",</code>
+      <code class="cpp">       NS_ConvertUTF16toUTF8(id).get());</code>
+      </pre>
+      <footer class="notes">
+       みなさんご存知のようにアニメーションというものはDOMの要素に紐付いています。
+       ※ 擬似要素・一部のWeb アニメーションを除く
+       従って、知りたいアニメーションがどの要素上で動いているかを知ることはとても重要になります。
+       例えば、
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="identified-by-frame" class="slide"><div>
+    <section>
+      <header>
+        <h2>2. animationの特定 (nsIFrameから)</h2>
+      </header>
+      <pre>
+      <code class="cpp">// nsIFrame* frame;</code>
+      <code class="cpp">if (frame->GetContent()->IsElement()) {</code>
+      <code class="cpp">  // elementから特定できるようになる</code>
+      <code class="cpp">  Element* element =</code>
+      <code class="cpp">    frame->GetContent()->AsElement();</code>
+      </pre>
+      <footer class="notes">
+       layout のコードの中では、DOM の要素が手近にないこともよくあります。
+       そのような場合は、近くに nsIFrame が大抵ありますので、それを利用してアニメーションを特定できます。
+       実際には、その nsIFrameから先ほども使った Element を取得して、その後は、同じように要素に指定した id を取得するだけです。
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="identified-by-id" class="slide"><div>
+    <section>
+      <header>
+        <h2>3. animationの特定 (id属性から)</h2>
+      </header>
+      <small>Javascript</small>
+      <pre>
+      <code class="javascript">var animation = div.getAnimations()[0];</code>
+      <code class="javascript">animation.id = 'オレオレ';</code>
+      </pre>
+      <small>C++</small>
+      <pre>
+      <code class="cpp">// Animation& animation;</code>
+      <code class="cpp">nsAutoString id;</code>
+      <code class="cpp">animation.GetId(id);</code>
+      <code class="cpp">printf("animation id: %s\n",</code>
+      <code class="cpp">       NS_ConvertUTF16toUTF8(id).get());</code>
+      </pre>
+      <footer class="notes">
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="using-debugger" class="slide"><div>
+    <section>
+      <header>
+        <h2></h2>
+      </header>
+      <pre>
+      <code class="cpp">// Animation& animation;</code>
+      <code class="cpp">nsAutoString id;</code>
+      <code class="cpp">animation.GetId(id);</code>
+      <code class="cpp">if (id.EqualsLiteral("target")) {</code>
+      <code class="cpp">  ... // ここにbreak point</code>
+      <code class="cpp">}</code>
+      </pre>
+      <footer class="notes">
+
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="print-timestamp" class="slide"><div>
+    <section>
+      <header>
+        <h2>Timestampの表示</h2>
+      </header>
+      <!--
+      <img src="pictures/1097px-Tunnels_of_Time.jpg"
+           class="middle"
+           alt="time">
+      <small class="credits">
+        <a href="http://www.flickr.com/people/21649179@N00">
+          Image by fdecomite
+        </a>
+      </small>
+      -->
+      <pre>
+      <code class="cpp">// TimeStamp time;</code>
+      <code class="cpp">bool unused;</code>
+      <code class="cpp">TimeDuration duration =</code>
+      <code class="cpp">  time - TimeStamp::ProcessCreation(unused);</code>
+      <code class="cpp">printf("%f\n", duration.ToMilliSeconds());</code>
+      </pre>
+      <footer class="notes">
+       アニメーションは
+       ここでの処理とあっちとで同じフレーム内での処理なのかを区別したくなる時があります。
+       例えば、
+       その場合は、Timestamp を表示/取得することで区別ができるようになります。
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="print-nsCSSProperty" class="slide"><div>
+    <section>
+      <header>
+        <h2>nsCSSPropertyの表示</h2>
+      </header>
+      <pre>
+      <code class="cpp">// nsCSSProperty property;</code>
+      <code class="cpp">printf("%s\n",</code>
+      <code class="cpp">       nsCSSProps::PropertyIDLName(property));</code>
+      </pre>
+      <footer class="notes">
+       nsCSSProperty は CSS のプロパティを表す列挙型です。
+       Animation は複数の CSS プロパティを持っているため、場合によっては
+       どのプロパティを今見ているかという情報が必要になる時があります。
+       例えば、
+      </footer>
+    </section>
+  </div></div>
+
+  <div id="print-AnimValuesStyleRule" class="slide"><div>
+    <section>
+      <header>
+        <h2>AnimValuesStyleRuleの表示</h2>
+      </header>
+      <pre>
+      <code class="cpp">// AnimValusStyleRule* styleRule;</code>
+      <code class="cpp">styleRule->List();</code>
+      </pre>
+      <footer class="notes">
+      AnimValuesStyleRule
+      </footer>
+    </section>
+  </div></div>
+
+  <!--
+    To hide progress bar from entire presentation
+    just remove “progress” element.
+    -->
+  <div class="progress"><div></div></div>
+  <div id="langMenuDivId">
+    <!-- Having event.stopPropagation() prevents keypresses on the language menu from affecting slideshow progression -->
+    <select id="langMenuId" onchange="changeLanguage();" onkeydown="event.stopPropagation()">
+      <option value="en-US">English</option>
+      <option value="zh-CN">中文（简体）</option>
+      <option value="zh-TW">中文（繁體）</option>
+      <option value="ja-JP">日本語</option>
+    </select>
+  </div>
+  <script src="scripts/script.js"></script>
+  <script src="scripts/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- Copyright © 2010–2012 Vadim Makeev — pepelsbey.net -->
+</body>
+</html>
