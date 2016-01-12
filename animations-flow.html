@@ -220,10 +220,48 @@ h1 sub
   0% { top: 100%; }
   100% { top: -170%; }
 }
+
+@keyframes turn-off {
+  0% {
+    transform: scale(1, 1.3) translate3d(0, 0, 0);
+    filter: brightness(1);
+    opacity: 1;
+  }
+  60% {
+    transform: scale(1.3, 0.001) translate3d(0, 0, 0);
+    filter: brightness(10);
+  }
+  100% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: scale(0, 0.0001) translate3d(0, 0, 0);
+    filter: brightness(50);
+  }
+}
+
+@keyframes off {
+  0% {
+    transform: scale(1.0, 1.0);
+    opacity: 1.0;
+  }
+  40% {
+    transform: scale(1.0, 0.005);
+    box-shadow: inset 0 9999px 0 rgba(255,255,255,1.0);
+  }
+  70% {
+    opacity: 1.0;
+  }
+  100% {
+    opacity: 0.0;
+    transform: scale(0.5, 0.005);
+    box-shadow: inset 0 9999px 0 rgba(255,255,255,1.0);
+  }
+}
+
 </style>
 
 </head>
 <body>
+<div id="screen">
 
 <p id="start">Geckoでのアニメーション処理の流れ</p>
 
@@ -269,13 +307,53 @@ h1 sub
    nsRefreshDriver::Tick 内でのアニメーションに関する処理は以下の順序で実行されます。
   </p>
   <p class="center">Animation::Tick</p>
-  <p class="center">Dispatch animation events (animationend etc.)</p>
+  <p class="center">dispatch animation events (animationend etc.)</p>
   <p class="center">requestAnimationFrame</p>
-  <p class="center">Style</p>
-  <p class="center">Layout</p>
-  <p class="center">Paint</p>
+  <p class="center">style</p>
+  <p class="center">layout</p>
+  <p class="center">paint</p>
+  <p>
+   先ほど説明した style/layout/paint の前に３つの処理が行われています。
+   後に処理されるものから順に見ていきましょう。
+  </p>
+  <p class="center">requestAnimationFrame</p>
+  <p>
+   requestAnimationFrame は皆さん良くご存知だと思います。
+   ブラウザの描画処理が実行される直前に呼び出される callback を登録しておき、
+   callback 内で style を変更するなどしてスクリプトでアニメーションを制御するのに利用できる機能です。
+   この callback を呼び出す処理が Gecko の描画処理、style/layout/paint の処理の直前に実行されています。
+   非常に理にかなった実装ですね。
+   もちろん、requestAnimationFrame が呼び出されていない時にはこの処理は実行されません。
+   続いてanimationイベントの処理を見ていきましょう。
+  </p>
+  <!--
+  <p>
+   2016年1月現在の Gecko の実装では、fullscreen のイベントの処理が animation イベント処理の後に実行されています。
+   WHATWG の HTML spec 内に規定されている、Processing model というセクションにによれば、
+   ここではイベントの処理だけではなくレンダリングの処理も実行するように書かれています。
+   また、Processing model には、dispatch animations events の前にも、resize、scroll、evaluate media queries and report changes の
+   処理を実行するように書かれています。
+  </p
+  -->
+  <p class="center">dispatch animation events</p>
+  <p>
+   requestAnimationFrame の処理の直前には、CSS animation/CSS transition のイベント処理が実行されています。
+   animationstart/animationend/animationiteration そして transitionend の４つのイベント処理です。
+  </p>
+  <p class="center">Animation::Tick</p>
+  <p>
+  </p>
 
 </div></div>
 
+</div>
 
+<script>
+  var titlecontent = document.getElementById("titlecontent");
+  titlecontent.addEventListener("animationend", function() {
+    var screen = document.getElementById("screen");
+    screen.style.animation = "off 1s";
+  });
+
+</script>
 </body></html>
