@@ -329,11 +329,11 @@ h1 sub
   <!--
   <p>
    2016年1月現在の Gecko の実装では、fullscreen のイベントの発火処理が animation イベント処理の後に実行されています。
-   WHATWG の HTML spec 内に規定されている、Processing model というセクションにによれば、
+   WHATWG の HTML spec 内に規定されている、Processing model というセクションによれば、
    ここではイベントの処理だけではなくレンダリングの処理も実行するように書かれています。
    また、Processing model には、dispatch animations events の前にも、resize、scroll、evaluate media queries and report changes の
-   処理を実行するように規定されています。
-  </p
+   処理を実行するように規定されていますが、 Gecko ではまだそのような実装になっていません。
+  </p>
   -->
   <p class="center">dispatch animation events</p>
   <p>
