@@ -328,21 +328,30 @@ h1 sub
   </p>
   <!--
   <p>
-   2016年1月現在の Gecko の実装では、fullscreen のイベントの処理が animation イベント処理の後に実行されています。
+   2016年1月現在の Gecko の実装では、fullscreen のイベントの発火処理が animation イベント処理の後に実行されています。
    WHATWG の HTML spec 内に規定されている、Processing model というセクションにによれば、
    ここではイベントの処理だけではなくレンダリングの処理も実行するように書かれています。
    また、Processing model には、dispatch animations events の前にも、resize、scroll、evaluate media queries and report changes の
-   処理を実行するように書かれています。
+   処理を実行するように規定されています。
   </p
   -->
   <p class="center">dispatch animation events</p>
   <p>
-   requestAnimationFrame の処理の直前には、CSS animation/CSS transition のイベント処理が実行されています。
-   animationstart/animationend/animationiteration そして transitionend の４つのイベント処理です。
+   requestAnimationFrame の処理の直前には、CSS animation/CSS transition のイベント発火処理が実行されています。
+   animationstart/animationend/animationiteration そして transitionend の４つのイベントです。
+   これらのイベントはこの後に説明する Animation::Tick から呼び出されている処理でイベントを発行する必要があるかどうかのチェックが
+   行われ、発行が必要なイベントはキューに保存されています。
+   そのキュー内に保存されているイベントをここではそれぞれ発火する処理を実行しています。
   </p>
   <p class="center">Animation::Tick</p>
   <p>
   </p>
+  <--
+  <p>
+  paintの話
+  nsDisplayListとか。いつか書く。
+  </p>
+  -->
 
 </div></div>
 
