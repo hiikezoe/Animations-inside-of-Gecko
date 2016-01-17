@@ -345,11 +345,27 @@ h1 sub
   </p>
   <p class="center">Animation::Tick</p>
   <p>
+   nsRefreshDriver::Tick では主に描画に関連する処理が実行されていました。
+   一方、Animation::Tick ではアニメーションの状態をチェックし、その状態に応じてその後の描画処理等を行うように要請する処理を実行しています。
+   もし、アニメーションがその経過時間 duration を過ぎて終了しているのであれば、Web Animations の spec に定義されている finished promise を resolve する
+   処理を micro task のキューに入れます。また、onfinish イベントもキューに入れています。
+   またここでは、アニメーションが compositor スレッドで動作可能かを判断し、動作可能であれば、style/layout/paint の処理をスキップするようにしています。
   </p>
   <--
+  <p class="center">compositorで走るAnimations</p>
   <p>
-  paintの話
-  nsDisplayListとか。いつか書く。
+   いつか書く。
+  </p>
+   styleの話。いつか書く。
+   CalcDifference()が返す nsChangeHint によって、その後の layout の処理が必要かどうかを判断している。
+  </p>
+  <p>
+   styleの話。いつか書く。
+   CalcDifference()が返す nsChangeHint によって、その後の layout の処理が必要かどうかを判断している。
+  </p>
+  <p>
+   paintの話。いつか書く。
+   nsDisplayListとか。
   </p>
   -->
 
