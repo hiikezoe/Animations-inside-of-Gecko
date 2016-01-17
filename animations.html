@@ -251,7 +251,9 @@
        みなさんご存知のようにアニメーションというものはDOMの要素に紐付いています。
        (※ 擬似要素・一部のWeb アニメーションを除く)
        従って、知りたいアニメーションがどの要素上で動いているかを知ることはとても重要になります。
-       例えば、
+       見ているコードのすぐそばに DOM の Element クラスがある場合、アニメーションの特定は非常に簡単です。
+       アニメーションしている DOM の要素に id 属性を指定しておき、Gecko 内のコードで Element クラスに対して、
+       GetId() を呼ぶだけです。
       </footer>
     </section>
   </div></div>
@@ -271,7 +273,8 @@
       <footer class="notes">
        layout のコードの中では、DOM の要素が手近にないこともよくあります。
        そのような場合でも、近くに nsIFrame が大抵ありますので、それを利用してアニメーションを特定できます。
-       実際には、その nsIFrameから先ほども使った Element を取得して、その後は、同じように要素に指定した id を取得するだけです。
+       実際には、その nsIFrame から先ほども使った Element を取得して、その後は、同じように要素に指定した id を取得するだけです。
+       nsIFrame に対して、GetContent() を呼び出し、その返ってきた nsIContent が Element の場合に AsElement() を呼ぶと Element が取得できます。
       </footer>
     </section>
   </div></div>
@@ -301,10 +304,15 @@
        なぜなら、この animation.id はつい１週間ほど前に取り込まれたばかりの機能だからです。
        この animation.id が他の手段と比べて特別なのには理由があります。
        この animation.id はそこにいる清水さんが実装しました。
-       そして、自動テストはそこにいるはずの宮本さんが書きました。
+       そして、自動テストはここにいるはずの宮本さんが書きました。
        お二人とも、 Gecko Inside に参加して、『よし、いっちょやってやるか。』と手を動かしてくれました。
        すばらしいお二人に拍手をお願いします！
        animation.id はこの Gecko Inside から生まれたと言っても過言ではないと思います。
+       今回の Gecko Inside で何人の人が開発に参加してくれるのかと想像するだけで楽しくなってきますね。
+       みなさんに期待してます！
+       animation.id の使い方はいたって簡単です。Javascript 内で取得した animation オブジェクトに対して、
+       id 属性を指定し、Gecko 内のコードで Animation クラスに対して GetId() を呼び出すと指定した id が返ってきます。
+       先ほどの Element の id と全く同じようにできます。
       </footer>
     </section>
   </div></div>
@@ -312,7 +320,7 @@
   <div id="using-debugger" class="slide"><div>
     <section>
       <header>
-        <h2></h2>
+        <h2>デバッガを使う</h2>
       </header>
       <pre>
       <code class="cpp">// Animation& animation;</code>
@@ -323,7 +331,11 @@
       <code class="cpp">}</code>
       </pre>
       <footer class="notes">
-
+       さて、ここまでの説明で animation を特定する手段が分かりました。
+       目的とする animation が特定できれば、後はデバッガで break point を設定しても大丈夫です。
+       見たくもないアニメに悩まされることはなくなります。
+       animation を特定するために取得した id が目的とする animation の id と同じかどうかを判定する if ブロックを作り
+       その中に適当なコードを書き、そこに break point を設定します。簡単ですね。
       </footer>
     </section>
   </div></div>
