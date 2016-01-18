@@ -121,7 +121,7 @@
         先の動画では Gecko 内部にはどのようなアニメーションの種類があって、
         どのようにアニメーションが生成され、どのように処理されるかを説明しました。
         もし、理解できなかった方がいらっしゃいましたら、それは、動体視力が足りません。
-        もっとアニメをたくさん見て動体視力・聴力を鍛えてください。
+        もっとアニメをたくさん見て動体視力、また聴力を鍛えてください。
         しかし、たとえ先の動画を理解できたとしてもそれだけでは Gecko のアニメーション機能を
         開発していくには十分ではありません。
         どうしてでしょうか？
@@ -177,11 +177,10 @@
         Firefox それ自体でも、タブのローディングアイコン、Awesome バーの下向きアイコンや進むボタンの表示等、
         また、ダウンロード時のアイコンアニメーションなどなど、様々な所でアニメーションが利用されています。
         そのような状況の中で、問題を調査するためのテストケースやサンプルの HTML ファイルを読み込んで、
-        デバッガで break point を設定すると目的外のアニメーションの処理で止まってしまい、
-        そのことに気づかないでいると全く見当違いのコードを書いてしまうことになってしまいます。
+        安易にデバッガで break point を設定すると目的外のアニメーションの処理で止まってしまっていることがよくあります。
+        そして、そのことに気づかないでいると全く見当違いのコードを書いてしまうことになってしまいます。
         実際に私はこれまで何度もそういうことを繰り返して来ました。
-        (基本的に 16.6ms 毎に同じ処理が呼び出されます！)
-        (もちろんデバッガで break すると後の挙動が変わります！)
+        しかも、アニメーションの処理は基本的に 16.6ms 毎に同じ処理が呼び出されていますので、
       </footer>
     </section>
   </div></div>
@@ -192,10 +191,10 @@
         <h2>documentの特定</h2>
       </header>
       <pre>
-        <code class="cpp">// nsIDocument* document;</code>
-        <code class="cpp">nsAutoCString spec;</code>
-        <code class="cpp">document->GetDocumentURI()->GetSpec(spec);</code>
-        <code class="cpp">printf("document: %s\n", spec.get());</code>
+        <code class="cpp">// nsIDocument* document;
+nsAutoCString spec;
+document->GetDocumentURI()->GetSpec(spec);
+printf("document: %s\n", spec.get());</code>
       </pre>
       <footer class="notes">
        Firefox の起動オプションには、-layoutdebug というオプションが付いていて、
@@ -240,11 +239,11 @@
       </pre>
       <small>C++</small>
       <pre>
-      <code class="cpp">// Element* element;</code>
-      <code class="cpp">nsAutoString id;</code>
-      <code class="cpp">element->GetId(id);</code>
-      <code class="cpp">printf("element: %s\n",</code>
-      <code class="cpp">       NS_ConvertUTF16toUTF8(id).get());</code>
+      <code class="cpp">// Element* element;
+nsAutoString id;
+element->GetId(id);
+printf("element: %s\n",
+       NS_ConvertUTF16toUTF8(id).get());</code>
       </pre>
       <footer class="notes">
        みなさんご存知のようにアニメーションというものはDOMの要素に紐付いています。
@@ -263,11 +262,11 @@
         <h2>2. animationの特定 (nsIFrameから)</h2>
       </header>
       <pre>
-      <code class="cpp">// nsIFrame* frame;</code>
-      <code class="cpp">if (frame->GetContent()->IsElement()) {</code>
-      <code class="cpp">  // elementから特定できるようになる</code>
-      <code class="cpp">  Element* element =</code>
-      <code class="cpp">    frame->GetContent()->AsElement();</code>
+      <code class="cpp">// nsIFrame* frame;
+if (frame->GetContent()->IsElement()) {
+  // elementから特定できるようになる
+  Element* element =
+    frame->GetContent()->AsElement();</code>
       </pre>
       <footer class="notes">
        layout のコードの中では、DOM の要素が手近にないこともよくあります。
@@ -285,16 +284,16 @@
       </header>
       <small>Javascript</small>
       <pre>
-      <code class="javascript">var animation = div.getAnimations()[0];</code>
-      <code class="javascript">animation.id = 'オレオレ';</code>
+      <code class="javascript">var animation = div.getAnimations()[0];
+animation.id = 'オレオレ';</code>
       </pre>
       <small>C++</small>
       <pre>
-      <code class="cpp">// Animation& animation;</code>
-      <code class="cpp">nsAutoString id;</code>
-      <code class="cpp">animation.GetId(id);</code>
-      <code class="cpp">printf("animation id: %s\n",</code>
-      <code class="cpp">       NS_ConvertUTF16toUTF8(id).get());</code>
+      <code class="cpp">// Animation& animation;
+nsAutoString id;
+animation.GetId(id);
+printf("animation id: %s\n",
+       NS_ConvertUTF16toUTF8(id).get());</code>
       </pre>
       <footer class="notes">
        animation の特定手段としてはこれが真打です。
@@ -321,6 +320,11 @@
       <header>
         <h2>4. animationの特定 (compositorスレッド)</h2>
       </header>
+      <pre>
+      <code>
+       TBD
+      </code>
+      </pre>
       <footer class="notes">
         compositor で動作可能なアニメーションの CSS プロパティは現在までのところ、opacity と transform に限られているため、
         動作するアニメーションに限りがあること、また、私があまり gfx::Layers 下を修正する必要に迫られて来なかったため、
@@ -339,12 +343,12 @@
         <h2>デバッガを使う</h2>
       </header>
       <pre>
-      <code class="cpp">// Animation& animation;</code>
-      <code class="cpp">nsAutoString id;</code>
-      <code class="cpp">animation.GetId(id);</code>
-      <code class="cpp">if (id.EqualsLiteral("target")) {</code>
-      <code class="cpp">  ... // ここにbreak point</code>
-      <code class="cpp">}</code>
+      <code class="cpp">// Animation& animation;
+nsAutoString id;
+animation.GetId(id);
+if (id.EqualsLiteral("target")) {
+  ... // ここにbreak point
+}</code>
       </pre>
       <footer class="notes">
        さて、ここまでの説明で animation を特定する手段が分かりました。
@@ -372,11 +376,11 @@
       </small>
       -->
       <pre>
-      <code class="cpp">// TimeStamp time;</code>
-      <code class="cpp">bool unused;</code>
-      <code class="cpp">TimeDuration duration =</code>
-      <code class="cpp">  time - TimeStamp::ProcessCreation(unused);</code>
-      <code class="cpp">printf("%f\n", duration.ToMilliSeconds());</code>
+      <code class="cpp">// TimeStamp time;
+bool unused;
+TimeDuration duration =
+  time - TimeStamp::ProcessCreation(unused);
+printf("%f\n", duration.ToMilliSeconds());</code>
       </pre>
       <footer class="notes">
        アニメーションの処理は２枚目のスライドで説明したように繰り返しの処理です。
@@ -394,9 +398,9 @@
         <h2>nsCSSPropertyの表示</h2>
       </header>
       <pre>
-      <code class="cpp">// nsCSSProperty property;</code>
-      <code class="cpp">printf("%s\n",</code>
-      <code class="cpp">       nsCSSProps::PropertyIDLName(property));</code>
+      <code class="cpp">// nsCSSProperty property;
+printf("%s\n",
+       nsCSSProps::PropertyIDLName(property));</code>
       </pre>
       <footer class="notes">
        nsCSSProperty は CSS のプロパティを表す列挙型です。
@@ -413,8 +417,8 @@
         <h2>AnimValuesStyleRuleの表示</h2>
       </header>
       <pre>
-      <code class="cpp">// AnimValusStyleRule* styleRule;</code>
-      <code class="cpp">styleRule->List();</code>
+      <code class="cpp">// AnimValusStyleRule* styleRule;
+styleRule->List();</code>
       </pre>
       <footer class="notes">
       AnimValuesStyleRule
