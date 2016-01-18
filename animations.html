@@ -90,8 +90,7 @@
         <h2>Gecko内でのアニメーション処理の流れ</h2>
       </header>
       <video controls class="middle shadow">
-        <source src="videos/animation-flow.mp4" type="video/mp4"></source>
-        <source src="videos/animation-flow.webm" type="video/webm"></source>
+        <source src="videos/animations-flow.webm" type="video/webm"></source>
       </video>
       <small class="credits">
         Script by <a href="http://twitter.com/craigbuckler">@craigbuckler</a>
@@ -317,6 +316,23 @@
     </section>
   </div></div>
 
+  <div id="identify-compositor-animations" class="slide"><div>
+    <section>
+      <header>
+        <h2>4. animationの特定 (compositorスレッド)</h2>
+      </header>
+      <footer class="notes">
+        compositor で動作可能なアニメーションの CSS プロパティは現在までのところ、opacity と transform に限られているため、
+        動作するアニメーションに限りがあること、また、私があまり gfx::Layers 下を修正する必要に迫られて来なかったため、
+        compositor スレッド内でアニメーションを特定する手段については、私は知りません。
+        おそらく、2016年1月現在、gfx::Layers など compositor スレッドで動作しているアニメーションを特定することはできないと思います。
+        やるとすれば、LayersMessages.ipdlh 内で定義されている struct Animation に id を追加して メインスレッドで動作している dom::Animation クラス
+        の id を渡してやると compositor 側でもアニメーションを特定可能になります。
+        compositor スレッドでは DOM の Element は全く現れないため、dom::Element クラスの id を取得する手段はここでは使用できません。
+      </footer>
+    </section>
+  </div></div>
+
   <div id="using-debugger" class="slide"><div>
     <section>
       <header>
@@ -363,10 +379,11 @@
       <code class="cpp">printf("%f\n", duration.ToMilliSeconds());</code>
       </pre>
       <footer class="notes">
-       アニメーションは
-       ここでの処理とあっちとで同じフレーム内での処理なのかを区別したくなる時があります。
-       例えば、
-       その場合は、Timestamp を表示/取得することで区別ができるようになります。
+       アニメーションの処理は２枚目のスライドで説明したように繰り返しの処理です。
+       その繰り返しの処理の中で、本来であればこの処理とこの処理は同じフレーム内で処理されていて欲しいなどという状況が出てきます。
+       ここでいうフレームとは、requestAnimationFrame のフレームと同じ意味です。
+       特に私が担当しているアニメーションの処理の最適化においては、このフレームの違いを識別できるかどうかが開発効率に
+       その場合は、nsRefreshDriver が持っている Timestamp を表示/取得することで区別ができるようになります。
       </footer>
     </section>
   </div></div>
