@@ -228,8 +228,9 @@ printf("document: %s\n", spec.get());</code>
         5) Animation から
         　 GetRenderedDocument()
        (注)
-       Gecko の命名規則で、getter に Get と付いている関数は nullptr を返す可能性があるという
-       ドキュメントを読んだ記憶があるんですが、この資料を作成する時に探してみたら見つかりませんでした。
+       Gecko の命名規則で、getter に Get と付いている関数は nullptr を返す可能性があり、
+       ついてない関数は nullptr を返さないというドキュメントを読んだ記憶があるんですが、
+       この資料を作成する時に探してみたら見つかりませんでした。
        というわけで、適宜 nullptr チェックしてから使ってください。
        ここに挙げた関数でいうと、nsRefreshDriver の PresContext() に nullptr チェックが必要になります。
        あとは、Animation の GetRenderedDocument() にも必要です。
@@ -256,6 +257,7 @@ printf("element: %s\n",
        NS_ConvertUTF16toUTF8(id).get());</code>
       </pre>
       <footer class="notes">
+       さて、次はアニメーションです。
        みなさんご存知のようにアニメーションというものはDOMの要素に紐付いています。
        (※ 擬似要素・一部のWeb アニメーションを除く)
        従って、知りたいアニメーションがどの要素上で動いているかを知ることはとても重要になります。
@@ -339,7 +341,7 @@ printf("animation id: %s\n",
         compositor で動作可能なアニメーションの CSS プロパティは現在までのところ、opacity と transform に限られているため、
         動作するアニメーションに限りがあること、また、私があまり gfx::Layers 下を修正する必要に迫られて来なかったため、
         compositor スレッド内でアニメーションを特定する手段については、私は知りません。
-        おそらく、2016年1月現在、gfx::Layers など compositor スレッドで動作しているアニメーションを特定することはできないと思います。
+        おそらく、2016年1月現在、gfx/ 以下のコードで compositor スレッドで動作しているアニメーションを特定することはできないと思います。
         やるとすれば、LayersMessages.ipdlh 内で定義されている struct Animation に id を追加して メインスレッドで動作している dom::Animation クラス
         の id を渡してやると compositor 側でもアニメーションを特定可能になります。
         compositor スレッドでは DOM の Element は全く現れないため、dom::Element クラスの id を取得する手段はここでは使用できません。
@@ -366,6 +368,7 @@ if (id.EqualsLiteral("target")) {
        見たくもないアニメに悩まされることはなくなります。
        animation を特定するために取得した id が目的とする animation の id と同じかどうかを判定する if ブロックを作り
        その中に適当なコードを書き、そこに break point を設定します。簡単ですね。
+       ここまでの説明を聞いていれば、ドキュメントの特定とアニメーションの特定ができるようになったはずです。
       </footer>
     </section>
   </div></div>
@@ -416,7 +419,7 @@ printf("%s\n",
        nsCSSProperty は CSS のプロパティを表す列挙型です。
        Animation は複数の CSS プロパティを持っているため、場合によっては
        どのプロパティを今見ているかという情報が必要になる時があります。
-       例えば、
+       デバッグ用に printf したい場合は nsCSSProps::PropertyIDLName() を呼び出すだけで char* が返ってくるので非常に簡単です。
       </footer>
     </section>
   </div></div>
@@ -431,7 +434,12 @@ printf("%s\n",
 styleRule->List();</code>
       </pre>
       <footer class="notes">
-      AnimValuesStyleRule
+      AnimValuesStyleRule は style 処理で使用される nsIStyleRule を継承しているクラスです。
+      nsIStyleRule を継承しているクラスは List() という関数を実装していて、これを呼び出すことで、
+      標準出力に対してその情報を出力してくれます。
+      出力される情報は各 nsIStyleRule 毎に異なっています。
+      AnimValuesStyleRule の場合どのような情報が出力されるのかは忘れてしまいました。
+      ぜひ皆さんの目で確かめてみてください。
       </footer>
     </section>
   </div></div>
