@@ -155,7 +155,9 @@
       slides[slideNumber].className.indexOf('autoplay') !== -1) {
       var video = slides[slideNumber].querySelector('video');
       if (video) {
-        video.play();
+        setTimeout(function() {
+          video.play();
+        }, 1500);
       }
     }
   }
