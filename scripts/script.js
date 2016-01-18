@@ -136,7 +136,6 @@
       if (!isListMode()) {
         updateProgress(slideNumber);
         GIFrefresh(slideNumber);
-        startAnimationsIfAutoplay(slideNumber);
         playVideoIfAutoplay(slideNumber);
       }
     }
@@ -147,16 +146,6 @@
       var img = slides[slideNumber].querySelector('img');
       if (img && img.src.indexOf('gif') !== -1) {
         img.src = img.src;
-      }
-    }
-  }
-
-  function startAnimationsIfAutoplay(slideNumber) {
-    if (slides[slideNumber] &&
-      slides[slideNumber].className.indexOf('autoplay') !== -1) {
-      var video = slides[slideNumber].querySelector('video');
-      if (video) {
-        animation.currentTime = 0;;
       }
     }
   }
